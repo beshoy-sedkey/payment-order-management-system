@@ -2,19 +2,20 @@
 
 namespace App\Exceptions;
 
+use Throwable;
+use Illuminate\Http\Request;
 use App\Http\Responses\ResponsesInterface;
-use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Contracts\Container\Container;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
-use Illuminate\Http\Request;
-use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\Exceptions\ThrottleRequestsException;
+use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Throwable;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 class ApiHandler extends ExceptionHandler
 {
@@ -95,6 +96,11 @@ class ApiHandler extends ExceptionHandler
             return $this->unauthenticated($request, $e);
         } elseif ($e instanceof ValidationException) {
             return $this->convertValidationExceptionToResponse($e, $request);
+        }elseif ($e instanceof ThrottleRequestsException) {
+            return response()->json([
+                'error' => 'Too Many Requests',
+                'message' => 'You have exceeded the rate limit. Please try again later.'
+            ], 429);
         }
 
         return $request->expectsJson() || $request->isJson() || $request->is('api/*')
