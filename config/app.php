@@ -1,6 +1,7 @@
 <?php
 
 use App\Providers\APIServiceProvider;
+use App\Providers\PaymentServiceProvider;
 use App\Providers\RepositoriesServiceProvider;
 use Illuminate\Support\Facades\Facade;
 use Illuminate\Support\ServiceProvider;
@@ -172,6 +173,7 @@ return [
         App\Providers\RouteServiceProvider::class,
         App\Providers\APIServiceProvider::class,
         App\Providers\RepositoriesServiceProvider::class,
+        App\Providers\PaymentServiceProvider::class,
         Tymon\JWTAuth\Providers\LaravelServiceProvider::class
     ])->toArray(),
 

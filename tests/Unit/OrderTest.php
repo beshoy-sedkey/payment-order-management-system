@@ -32,7 +32,7 @@ class OrderTest extends TestCase
 
         $this->assertDatabaseHas('orders', ['id' => $order->id]);
 
-        $this->assertContains($order->status, ['pending', 'paid', 'cacnceled']);
+        $this->assertContains($order->status, ['pending', 'paid', 'canceled']);
         $this->assertIsNumeric($order->quantity);
         $this->assertIsNumeric($order->price);
 

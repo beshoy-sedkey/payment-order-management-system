@@ -86,4 +86,9 @@ class OrderRepository implements OrderRepositoryInterface
 
         return $order;
     }
+
+    public function findById(int $id): Order
+    {
+        return $this->model->findOrFail($id);
+    }
 }

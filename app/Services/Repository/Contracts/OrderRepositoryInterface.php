@@ -12,4 +12,5 @@ interface OrderRepositoryInterface
     public function update(int $id, array $data): bool;
     public function createUsingFactory(?array $data ,  $count = null);
     public function updateStatus(int $id , string $status): Order;
+    public function findById(int $id): Order;
 }
