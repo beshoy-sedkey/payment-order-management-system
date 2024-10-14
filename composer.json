@@ -10,6 +10,8 @@
         "laravel/framework": "^10.10",
         "laravel/sanctum": "^3.3",
         "laravel/tinker": "^2.8",
+        "omnipay/omnipay": "^3.2",
+        "omnipay/paypal": "^3.0",
         "tymon/jwt-auth": "^2.1"
     },
     "require-dev": {
