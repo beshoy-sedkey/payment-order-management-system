@@ -33,13 +33,11 @@ jobs:
           echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
           echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
 
-
           php artisan key:generate
           grep '^APP_KEY=' .env || echo "APP_KEY=$(php artisan key:generate --show)" >> .env
 
           echo "PAYPAL_CLIENT_ID=${{ secrets.PAYPAL_CLIENT_ID }}" >> .env
           echo "PAYPAL_SECRET=${{ secrets.PAYPAL_SECRET }}" >> .env
-
 
       - name: Run database migrations
         run: php artisan migrate
@@ -72,6 +70,23 @@ jobs:
       - name: Install Composer dependencies
         run: composer install --prefer-dist --no-progress --no-interaction --optimize-autoloader --no-dev
 
+      - name: Prepare environment file (.env)
+        run: |
+          cp .env.example .env
+          echo "DB_CONNECTION=mysql" >> .env
+          echo "DB_HOST=${{ secrets.DB_HOST }}" >> .env
+          echo "DB_PORT=${{ secrets.DB_PORT }}" >> .env
+          echo "DB_DATABASE=${{ secrets.DB_DATABASE }}" >> .env
+          echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" >> .env
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
+
+          php artisan key:generate
+          grep '^APP_KEY=' .env || echo "APP_KEY=$(php artisan key:generate --show)" >> .env
+
+          echo "PAYPAL_CLIENT_ID=${{ secrets.PAYPAL_CLIENT_ID }}" >> .env
+          echo "PAYPAL_SECRET=${{ secrets.PAYPAL_SECRET }}" >> .env
+
       - name: Deploy to Heroku
         uses: akhileshns/heroku-deploy@v3.12.12
         with:
@@ -79,3 +94,6 @@ jobs:
           heroku_app_name: ${{ secrets.HEROKU_APP_NAME }}
           heroku_email: ${{ secrets.HEROKU_EMAIL }}
           procfile: "web: vendor/bin/heroku-php-apache2 public/"
+
+      - name: Run database migrations on Heroku
+        run: heroku run php artisan migrate --app ${{ secrets.HEROKU_APP_NAME }}
