@@ -1,4 +1,3 @@
-# .github/workflows/main.yml (or your workflow file name)
 name: Laravel CI/CD Pipeline with PayPal and JWT
 
 on:
@@ -23,12 +22,7 @@ jobs:
       - name: Install Composer dependencies
         run: composer install --prefer-dist --no-progress --no-interaction
 
-      - name: Generate and Set JWT Secret
-        run: |
-          php artisan jwt:secret
-          grep '^JWT_SECRET=' .env || echo "JWT_SECRET=$(php artisan jwt:secret)" >> .env
-
-      - name: Prepare environment file
+      - name: Prepare environment file (.env) # Combined and improved
         run: |
           cp .env.example .env
           echo "DB_CONNECTION=mysql" >> .env
@@ -37,9 +31,25 @@ jobs:
           echo "DB_DATABASE=${{ secrets.DB_DATABASE }}" >> .env
           echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" >> .env
           echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
-          echo "APP_KEY=${{ secrets.APP_KEY }}" >> .env
+
+          php artisan key:generate  # Generate a key if one doesn't exist
+          grep '^APP_KEY=' .env || echo "APP_KEY=$(php artisan key:generate --show)" >> .env # Add or update APP_KEY
+
+          php artisan jwt:secret # Generate JWT secret
+          grep '^JWT_SECRET=' .env || echo "JWT_SECRET=$(php artisan jwt:secret)" >> .env # Add or update JWT_SECRET
+
           echo "PAYPAL_CLIENT_ID=${{ secrets.PAYPAL_CLIENT_ID }}" >> .env
           echo "PAYPAL_SECRET=${{ secrets.PAYPAL_SECRET }}" >> .env
+
+
+      - name: Cache Configuration and Routes # Moved AFTER .env setup
+        uses: actions/cache@v3
+        with:
+          path: |
+            bootstrap/cache/
+          key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+
+      # Removed conditional config:clear — no longer needed
 
       - name: Run database migrations
         run: php artisan migrate
@@ -79,3 +89,4 @@ jobs:
           heroku_app_name: ${{ secrets.HEROKU_APP_NAME }}
           heroku_email: ${{ secrets.HEROKU_EMAIL }}
           procfile: "web: php artisan serve --host=0.0.0.0 --port=$PORT"
+
