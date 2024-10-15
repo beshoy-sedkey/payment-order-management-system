@@ -55,6 +55,7 @@ class AuthenticationController extends Controller
     {
         try {
             $user = $this->auth->setData($request->validated())->login();
+            dd($user);
         } catch (\Throwable $th) {
             throw $th;
         }
