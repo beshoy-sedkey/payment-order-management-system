@@ -1,4 +1,4 @@
-# .github/workflows/main.yml (or whatever your workflow file is named)
+# .github/workflows/main.yml (or your workflow file name)
 name: Laravel CI/CD Pipeline with PayPal and JWT
 
 on:
@@ -23,26 +23,40 @@ jobs:
       - name: Install Composer dependencies
         run: composer install --prefer-dist --no-progress --no-interaction
 
-      - name: Prepare environment file
-        run: |
-          cp .env.example .env
-          echo "DB_CONNECTION=mysql" >> .env
-          echo "DB_HOST=${{ secrets.DB_HOST }}" >> .env
-          echo "DB_PORT=${{ secrets.DB_PORT }}" >> .env
-          echo "DB_DATABASE=${{ secrets.DB_DATABASE }}" >> .env
-          echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" >> .env
-          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
-          echo "APP_KEY=${{ secrets.APP_KEY }}" >> .env
-          echo "PAYPAL_CLIENT_ID=${{ secrets.PAYPAL_CLIENT_ID }}" >> .env
-          echo "PAYPAL_SECRET=${{ secrets.PAYPAL_SECRET }}" >> .env
-
-      - name: Run database migrations
-        run: php artisan migrate
-
       - name: Generate and Set JWT Secret
         run: |
           php artisan jwt:secret
           grep '^JWT_SECRET=' .env || echo "JWT_SECRET=$(php artisan jwt:secret)" >> .env
+
+      - name: Prepare environment file
+        run: |
+          cp .env.example .env
+          echo "DB_CONNECTION=mysql" >> .env
+          echo "DB_HOST=${{ secrets.JAWSDB_HOST }}" >> .env
+          echo "DB_PORT=${{ secrets.JAWSDB_PORT }}" >> .env
+          echo "DB_DATABASE=${{ secrets.JAWSDB_DATABASE }}" >> .env
+          echo "DB_USERNAME=${{ secrets.JAWSDB_USERNAME }}" >> .env
+          echo "DB_PASSWORD=${{ secrets.JAWSDB_PASSWORD }}" >> .env
+          echo "APP_KEY=${{ secrets.APP_KEY }}" >> .env
+          echo "PAYPAL_CLIENT_ID=${{ secrets.PAYPAL_CLIENT_ID }}" >> .env
+          echo "PAYPAL_SECRET=${{ secrets.PAYPAL_SECRET }}" >> .env
+
+
+      - name: Cache Configuration and Routes
+        uses: actions/cache@v3
+        with:
+          path: |
+            bootstrap/cache/
+          key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+
+      - name: Clear Configuration Cache (if needed)
+        run: |
+          if [ ! -f bootstrap/cache/config.php ]; then
+            php artisan config:clear
+          fi
+
+      - name: Run database migrations
+        run: php artisan migrate
 
       - name: Execute tests
         run: php artisan test
