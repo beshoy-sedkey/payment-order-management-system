@@ -38,11 +38,11 @@ jobs:
           echo "PAYPAL_CLIENT_ID=${{ secrets.PAYPAL_CLIENT_ID }}" >> .env
           echo "PAYPAL_SECRET=${{ secrets.PAYPAL_SECRET }}" >> .env
 
-      # New step to ensure JWT secret is set
+      # Ensure the JWT secret is generated and added to the .env file
       - name: Generate JWT Secret
         run: |
           php artisan jwt:secret
-          grep '^JWT_SECRET=' .env || echo "JWT_SECRET=$(php artisan jwt:secret)" >> .env
+          grep '^JWT_SECRET=' .env || echo "JWT_SECRET=$(php artisan jwt:secret --show)" >> .env
 
       - name: Cache Configuration and Routes
         uses: actions/cache@v3
