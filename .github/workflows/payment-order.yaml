@@ -87,6 +87,9 @@ jobs:
           echo "PAYPAL_CLIENT_ID=${{ secrets.PAYPAL_CLIENT_ID }}" >> .env
           echo "PAYPAL_SECRET=${{ secrets.PAYPAL_SECRET }}" >> .env
 
+      - name: Run database migrations
+        run: php artisan migrate --force
+
       - name: Deploy to Heroku
         uses: akhileshns/heroku-deploy@v3.12.12
         with:
@@ -94,6 +97,3 @@ jobs:
           heroku_app_name: ${{ secrets.HEROKU_APP_NAME }}
           heroku_email: ${{ secrets.HEROKU_EMAIL }}
           procfile: "web: vendor/bin/heroku-php-apache2 public/"
-
-      - name: Run database migrations on Heroku
-        run: heroku run php artisan migrate --app ${{ secrets.HEROKU_APP_NAME }}
