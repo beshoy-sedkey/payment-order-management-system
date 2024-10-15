@@ -39,6 +39,11 @@ jobs:
       - name: Run database migrations
         run: php artisan migrate
 
+      - name: Generate and Set JWT Secret
+        run: |
+          php artisan jwt:secret
+          grep '^JWT_SECRET=' .env || echo "JWT_SECRET=$(php artisan jwt:secret)" >> .env
+
       - name: Execute tests
         run: php artisan test
 
