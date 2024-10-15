@@ -1,22 +1,34 @@
-name: Laravel CI/CD Pipeline
+name: Laravel CI/CD Pipeline with PayPal and JWT
 
 on:
   push:
-    branches: [main] # Adjust if using a different branch
+    branches: [main]
   pull_request:
     branches: [main]
 
 jobs:
   tests:
     runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8 # Use a suitable MySQL version
+        env:
+          MYSQL_ROOT_PASSWORD: root # Or a stronger password
+          MYSQL_DATABASE: ${{ secrets.DB_DATABASE }}
+          MYSQL_USER: ${{ secrets.DB_USERNAME }}
+          MYSQL_PASSWORD: ${{ secrets.DB_PASSWORD }}
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
     steps:
       - uses: actions/checkout@v3
+
       - name: Setup PHP
-        uses: shivammathur/setup-php@v2
+        uses: shivammathur/setup-php@v3
         with:
-          php-version: 8.1 # Specify your PHP version
+          php-version: 8.1 # Or the PHP version compatible with Laravel 11
           extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, mysql, bcmath, gd
-          coverage: xdebug # For test coverage
+          coverage: xdebug
 
       - name: Install Composer dependencies
         run: composer install --prefer-dist --no-progress --no-interaction
@@ -25,45 +37,48 @@ jobs:
         run: cp .env.example .env
         env:
           APP_KEY: ${{ secrets.APP_KEY }}
+          DB_CONNECTION: mysql
+          DB_HOST: mysql
+          DB_PORT: 3306
           DB_DATABASE: ${{ secrets.DB_DATABASE }}
           DB_USERNAME: ${{ secrets.DB_USERNAME }}
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-          PAYMENT_GATEWAY_API_KEY: ${{ secrets.PAYMENT_GATEWAY_API_KEY }} # Example for payment gateway
+          PAYPAL_CLIENT_ID: ${{ secrets.PAYPAL_CLIENT_ID }}
+          PAYPAL_SECRET: ${{ secrets.PAYPAL_SECRET }}
           # Add other secrets as needed
 
       - name: Run database migrations
         run: php artisan migrate --database=testing --force
 
       - name: Execute tests
-        run: vendor/bin/phpunit --coverage-text
-
-      - name: Generate coverage report
-        run: php vendor/bin/php artisan test --coverage-clover coverage.xml
+        run: php artisan test --coverage-clover coverage.xml
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
         with:
-          token: ${{ secrets.CODECOV_TOKEN }} # Get this from Codecov
+          token: ${{ secrets.CODECOV_TOKEN }}
           files: ./coverage.xml
 
   deploy:
-    needs: tests # Run tests before deploying
+    needs: tests
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' # Deploy only on pushes to main
+    if: github.ref == 'refs/heads/main'
     environment:
       name: production
       url: ${{ steps.deploy-to-heroku.outputs.url }}
     steps:
       - uses: actions/checkout@v3
+
       - name: Setup PHP
-        uses: shivammathur/setup-php@v2
+        uses: shivammathur/setup-php@v3
         with:
-          php-version: 8.1
+          php-version: 8.1 # Match the server's PHP version
           extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, mysql, bcmath, gd
 
       - name: Install Composer dependencies
         run: composer install --prefer-dist --no-progress --no-interaction --optimize-autoloader --no-dev
 
+       # Add deployment steps here (e.g., Heroku, Forge, etc.)
       - name: Deploy to Heroku
         uses: akhileshns/heroku-deploy@v3.12.12
         with:
