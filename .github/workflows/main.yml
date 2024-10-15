@@ -39,6 +39,6 @@ jobs:
     - uses: actions/checkout@v3
     - uses: akhileshns/heroku-deploy@v3.12.12
       with:
-        heroku_api_key: ${{secrets.HEROKU_API_KEY}}
-        heroku_app_name: ${{secrets.HEROKU_APP_NAME}}
-        heroku_email: ${{secrets.HEROKU_EMAIL}}
+        heroku_api_key: "HRKU-f6a92fa7-420d-4610-8064-4ba71e8f20b7"
+        heroku_app_name: "velents-test"
+        heroku_email: "beshoysedkey33@gmail.com"
