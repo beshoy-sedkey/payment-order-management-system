@@ -31,6 +31,8 @@ jobs:
           echo "DB_DATABASE=${{ secrets.DB_DATABASE }}" >> .env
           echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" >> .env
           echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
+
 
           php artisan key:generate
           grep '^APP_KEY=' .env || echo "APP_KEY=$(php artisan key:generate --show)" >> .env
@@ -38,18 +40,6 @@ jobs:
           echo "PAYPAL_CLIENT_ID=${{ secrets.PAYPAL_CLIENT_ID }}" >> .env
           echo "PAYPAL_SECRET=${{ secrets.PAYPAL_SECRET }}" >> .env
 
-      # Ensure the JWT secret is generated and added to the .env file
-      - name: Generate JWT Secret
-        run: |
-          php artisan jwt:secret
-          grep '^JWT_SECRET=' .env || echo "JWT_SECRET=$(php artisan jwt:secret --show)" >> .env
-
-      - name: Cache Configuration and Routes
-        uses: actions/cache@v3
-        with:
-          path: |
-            bootstrap/cache/
-          key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
 
       - name: Run database migrations
         run: php artisan migrate
