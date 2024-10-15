@@ -48,10 +48,10 @@ jobs:
           # Add other secrets as needed
 
       - name: Run database migrations
-        run: php artisan migrate --database=testing --force
+        run: php artisan migrate
 
       - name: Execute tests
-        run: php artisan test --coverage-clover coverage.xml
+        run: php artisan test 
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
