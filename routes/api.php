@@ -38,7 +38,7 @@ Route::middleware(['auth:api'])->group(function () {
     Route::post('/payments/purchase/{order}', [PaymentController::class, 'purchase']);
 });
 
-Route::get('/payments/success', [PaymentController::class, 'success'])->name('payment.success');
+Route::get('/payments/success', [PaymentController::class, 'success'])->name('payment.success'); dD('sssssss');
 Route::get('/payments/cancel', [PaymentController::class, 'cancel'])->name('payment.cancel');
 //WebHook Listener
 Route::post('webhook/paypal', [WebhookController::class, 'handleWebhook']);
