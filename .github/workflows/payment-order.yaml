@@ -41,20 +41,6 @@ jobs:
           echo "PAYPAL_CLIENT_ID=${{ secrets.PAYPAL_CLIENT_ID }}" >> .env
           echo "PAYPAL_SECRET=${{ secrets.PAYPAL_SECRET }}" >> .env
 
-
-      - name: Cache Configuration and Routes
-        uses: actions/cache@v3
-        with:
-          path: |
-            bootstrap/cache/
-          key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
-
-      - name: Clear Configuration Cache (if needed)
-        run: |
-          if [ ! -f bootstrap/cache/config.php ]; then
-            php artisan config:clear
-          fi
-
       - name: Run database migrations
         run: php artisan migrate
 
