@@ -24,7 +24,7 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Setup PHP
-        uses: shivammathur/setup-php@v3
+        uses: shivammathur/setup-php@v2
         with:
           php-version: 8.1 # Or the PHP version compatible with Laravel 11
           extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, mysql, bcmath, gd
@@ -70,7 +70,7 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Setup PHP
-        uses: shivammathur/setup-php@v3
+        uses: shivammathur/setup-php@v2
         with:
           php-version: 8.1 # Match the server's PHP version
           extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, mysql, bcmath, gd
