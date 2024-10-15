@@ -22,7 +22,7 @@ jobs:
       - name: Install Composer dependencies
         run: composer install --prefer-dist --no-progress --no-interaction
 
-      - name: Prepare environment file (.env) # Combined and improved
+      - name: Prepare environment file (.env)
         run: |
           cp .env.example .env
           echo "DB_CONNECTION=mysql" >> .env
@@ -32,30 +32,30 @@ jobs:
           echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" >> .env
           echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
 
-          php artisan key:generate  # Generate a key if one doesn't exist
-          grep '^APP_KEY=' .env || echo "APP_KEY=$(php artisan key:generate --show)" >> .env # Add or update APP_KEY
-
-          php artisan jwt:secret # Generate JWT secret
-          grep '^JWT_SECRET=' .env || echo "JWT_SECRET=$(php artisan jwt:secret)" >> .env # Add or update JWT_SECRET
+          php artisan key:generate
+          grep '^APP_KEY=' .env || echo "APP_KEY=$(php artisan key:generate --show)" >> .env
 
           echo "PAYPAL_CLIENT_ID=${{ secrets.PAYPAL_CLIENT_ID }}" >> .env
           echo "PAYPAL_SECRET=${{ secrets.PAYPAL_SECRET }}" >> .env
 
+      # New step to ensure JWT secret is set
+      - name: Generate JWT Secret
+        run: |
+          php artisan jwt:secret
+          grep '^JWT_SECRET=' .env || echo "JWT_SECRET=$(php artisan jwt:secret)" >> .env
 
-      - name: Cache Configuration and Routes # Moved AFTER .env setup
+      - name: Cache Configuration and Routes
         uses: actions/cache@v3
         with:
           path: |
             bootstrap/cache/
           key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
 
-      # Removed conditional config:clear — no longer needed
-
       - name: Run database migrations
         run: php artisan migrate
 
       - name: Execute tests
-        run: php artisan test
+        run: php artisan test --coverage-clover=coverage.xml
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
@@ -88,5 +88,4 @@ jobs:
           heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
           heroku_app_name: ${{ secrets.HEROKU_APP_NAME }}
           heroku_email: ${{ secrets.HEROKU_EMAIL }}
-          procfile: "web: php artisan serve --host=0.0.0.0 --port=$PORT"
-
+          procfile: "web: vendor/bin/heroku-php-apache2 public/"
